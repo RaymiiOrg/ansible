@@ -1,0 +1,73 @@
+---
+## Setup lighttpd on the cluster slave nodes with certificates and a common config file.
+## Author: R van Elst
+## Last Edited: 12-09-2012
+- hosts: nodes
+  sudo: True
+  user: remy
+      
+  vars:
+    wwwroot: "/srv/http/"
+    sslwwwroot: "/srv/https/"
+    wuser: "www-data"
+    wgroup: "www-data"
+    compress: '( "application/x-javascript", "text/css", "text/html", "text/plain" )'
+    servertag: "lighttpd"
+    servermaxkeepaliverequests: "80"
+    servermaxkeepaliveidle: "80"
+    servermaxreadidle: "80"
+    servermaxwriteidle: "80"
+    connectionkbytespersecond: "4096"
+    serverkbytespersecond: "8128"
+    serverfollowsymlink: "disable"
+    cafile: "/ca-bundle.crt"
+    pemfile: "/cert.pem"
+    raymiirewrite: 'rewriterule'
+    contentexpire: 'access plus 48 hours'
+    dirlist: "enable"
+
+
+
+  tasks:
+    - name: Check that the server is alive
+      action: ping
+
+    - name: install python-apt for debian
+      action: command /usr/bin/apt-get -y install python-apt
+
+    - name: Install lighttpd and php
+      action: apt name=$item state=latest
+      with_items:
+        - lighttpd
+        - php5-cgi
+
+    - name: Create ssl certificate dir
+      action: file path=/etc/ssl/cert state=directory
+
+    - name: copy raymii.org ssl certificate
+      action: copy src=config/cert.pem dest=/etc/ssl/cert/cert.pem owner=www-data group=www-data mode=0644
+
+    - name: copy ca-bundle ca chain
+      action: copy src=config/ca-bundle.crt dest=/etc/ssl/cert/ca-bundle.crt owner=www-data group=www-data mode=0644
+
+
+    - name: copy lighttpd slave node config
+      action: template src=config/lighttpd.conf.in dest=/etc/lighttpd/lighttpd.conf backup=yes
+      notify: restart lighttpd
+
+    - name: Fix cgi-pathinfo
+      action: 'lineinfile name=/etc/php5/cgi/php.ini regexp="^cgi.fix_pathinfo=1" line="cgi.fix_pathinfo=1"'
+      notify: restart lighttpd
+
+
+    - name: Enable lighttpd fastcgi + php module
+      action: command lighttpd-enable-mod fastcgi && lighttpd-enable-mod fastcgi-php
+      notify: restart lighttpd
+
+    - name: Give users permisisons on /var/www folder
+      action: file path=/var/www/ state=directory owner=remy group=remy mode=755  
+
+
+  handlers:
+    - name: restart lighttpd
+      action: service name=lighttpd state=restarted

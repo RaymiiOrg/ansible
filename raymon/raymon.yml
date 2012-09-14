@@ -1,0 +1,40 @@
+---
+## Deploy ray-mon status script
+## I need a user account which is able to sudo without password
+## I also need a working php-server.
+
+- hosts: status-servers
+  sudo: True
+  user: remy
+
+  vars:
+    scriptdir: "/srv/http/status"
+    wwwuser: "www-data"
+    wwwgroup: "www-data"
+    pbname: $inventory_hostname
+
+
+  tasks:
+
+  - name: Create ray-mon server script directory
+    action: file path=$scriptdir/ state=directory owner=$wwwuser group=$wwwuser mode=0755
+
+  - name: Get static files from github (for the html kickstart framework)
+    action: git repo=git://github.com/RaymiiOrg/HTML-KickStart.git dest=$scriptdir/git
+
+  - name: Copy stat.php
+    action: copy src=config/stat.php dest=$scriptdir/index.php owner=$wwwuser group=$wwwgroup mode=0755
+
+  - name: Deploy statget.sh
+    action: template src=config/statget.sh dest=$scriptdir/statget.sh owner=root group=root mode=0755
+
+  - name: Set statget.sh cronjob
+    action: template src=config/raymonserver.in dest=/etc/cron.d/raymon-server mode=0755 owner=root group=root
+
+  - name: Run statget script
+    action: command sudo $scriptdir/statget.sh
+    notify: notify crontab of new jobs
+
+  handlers:
+    - name: notify crontab of new jobs
+      action: command sudo crontab /etc/cron.d/*
