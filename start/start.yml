@@ -16,8 +16,11 @@
 
   tasks:
 
+- name: Remove script directory
+    action: file path=$scriptdir/ state=absent
+
   - name: Create script directory
     action: file path=$scriptdir/ state=directory owner=$wwwuser group=$wwwuser mode=0755
 
   - name: Checkout app on Github
-    action: git repo=git://github.com/RaymiiOrg/start.git dest=$scriptdir/
+    action: git repo=git://github.com/RaymiiOrg/start.git dest=$scriptdir/ branch=master
