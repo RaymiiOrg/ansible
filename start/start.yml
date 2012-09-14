@@ -1,0 +1,23 @@
+---
+## Deploy startpage app from Bas
+## I need a user account which is able to sudo without password
+## I also need a working webserver.
+
+- hosts: vps1.sparklingclouds.nl
+  sudo: True
+  user: remy
+
+  vars:
+    scriptdir: "/var/www/s"
+    wwwuser: "www-data"
+    wwwgroup: "www-data"
+    pbname: $inventory_hostname
+
+
+  tasks:
+
+  - name: Create script directory
+    action: file path=$scriptdir/ state=directory owner=$wwwuser group=$wwwuser mode=0755
+
+  - name: Checkout app on Github
+    action: git repo=git://github.com/RaymiiOrg/start.git dest=$scriptdir/
