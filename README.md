@@ -3,7 +3,7 @@ Ansible
 
 My ansible playbooks. 
 
-lighttpd-nodes is used for configuring lighttpd with an ssl certificate.  
+lighttpd-nodes is used for installing and configuring lighttpd with an ssl certificate as I want it.  
 raymon is used to deploy my little status monitoring applicaton server: [Ray-Mon](https://raymii.org/cms/p_Bash_PHP_Server_Status_Monitor)  
 
 Playbooks are here merely for example for others and reference. 
