@@ -33,8 +33,6 @@
 
   - name: Run statget script
     action: command sudo $scriptdir/statget.sh
-    notify: notify crontab of new jobs
 
-  handlers:
-    - name: notify crontab of new jobs
-      action: command sudo crontab /etc/cron.d/*
+  - name: make crontab aware of new cronjob
+    action: 'command sudo crontab /etc/cron.d/raymon-server'
