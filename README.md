@@ -6,7 +6,7 @@ My ansible playbooks.
 * lighttpd-nodes is used for installing and configuring lighttpd with an ssl certificate as I want it.  
 * raymon is used to deploy my little status monitoring applicaton server: [Ray-Mon](https://raymii.org/cms/p_Bash_PHP_Server_Status_Monitor)  
 * start is for the app by Bas ten Feld: [start](https://github.com/develup/start)  
-* munin-client is used to install munin client, it has the [hostedmunin.com](http://hostedmunin.com] servers by default, but you can essily define your own.
+* munin-client is used to install munin client, it has the [hostedmunin.com](http://hostedmunin.com) servers by default, but you can essily define your own.
 
 
 Playbooks are here merely for example for others and reference. 
