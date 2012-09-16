@@ -1,0 +1,34 @@
+---
+## Deploy a munin client with hosted-munin conf servers.
+## I need a user account which is able to sudo without password
+
+- hosts: nodes
+  sudo: True
+  user: remy
+
+  vars:
+    pbname: $inventory_hostname
+    listenaddr: '*'
+    listenport: '4949'
+    addr1: '^127\.0\.0\.1$'
+    addr2: '^127\.0\.0\.2$'
+    #hostedmunin.com
+    addr3: '^91\.227\.249\.12$'
+    addr4: '^91\.227\.249\.13$'
+    addr5: '^91\.227\.249\.20$'
+
+  tasks:
+
+  - name: Install munin-node
+    action: apt name=$item state=latest
+    with_items:
+     - munin-node
+
+  - name: Set munin-node config file
+    action: template src=config/munin-node.conf.in dest=/etc/munin/munin-node.conf owner=root group=root mode=0755
+    notify: restart munin-node
+
+
+  handlers:
+    - name: restart munin-node
+      action: service name=munin-node state=restarted
