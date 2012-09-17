@@ -7,7 +7,7 @@ My ansible playbooks.
 * raymon is used to deploy my little status monitoring applicaton server: [Ray-Mon](https://raymii.org/cms/p_Bash_PHP_Server_Status_Monitor)  
 * start is for the app by Bas ten Feld: [start](https://github.com/develup/start)  
 * munin-client is used to install munin client, it has the [hostedmunin.com](http://hostedmunin.com) servers by default, but you can essily define your own.
-
+* vnstat is used to install and setup vnstat on debian, including initializing and config file setup.
 
 Playbooks are here merely for example for others and reference. 
 
