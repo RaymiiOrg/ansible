@@ -1,13 +1,13 @@
 ---
 ## Install Oh-my-zsh
-## I need a user account which is able to sudo without password
+## I need a user account which is able to sudo without password or use the playbook with the -K option (ask sudo pass)
 
-- hosts: spcs
+- hosts: vps17.sparklingclouds.nl
   sudo: True
 
   vars:
     user: "remy"
-    zsh_theme: "steeef"
+    zsh_theme: "candy"
     pbname: $inventory_hostname
     distro: ${ansible_distribution}
     pkg_mgr: ${ansible_pkg_mgr}
