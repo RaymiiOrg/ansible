@@ -1,0 +1,29 @@
+---
+## Install Oh-my-zsh
+## I need a user account which is able to sudo without password
+
+- hosts: spcs
+  sudo: True
+
+  vars:
+    user: "remy"
+    zsh_theme: "steeef"
+    pbname: $inventory_hostname
+    distro: ${ansible_distribution}
+    pkg_mgr: ${ansible_pkg_mgr}
+
+  tasks:
+  - name: Install git and zsh with ${pkg_mgr}
+    action: ${pkg_mgr} name=$item state=latest
+    with_items:
+     - git
+     - zsh
+
+  - name: Clone oh-my-zsh repo
+    action: git repo=https://github.com/robbyrussell/oh-my-zsh.git dest=/home/${user}/.oh-my-zsh
+
+  - name: Set .zshrc
+    action: template src=files/zshrc.in dest=/home/${user}/.zshrc
+
+  - name: Set zsh as default shell
+    action: user name=${user} shell=/bin/zsh
