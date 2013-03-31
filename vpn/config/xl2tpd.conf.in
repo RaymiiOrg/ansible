@@ -1,0 +1,11 @@
+[global]
+ipsec saref = yes
+
+[lns default]
+ip range = 172.16.1.30-172.16.1.100
+local ip = 172.16.1.1
+unix authentication = yes
+require authentication = yes
+ppp debug = yes
+pppoptfile = /etc/ppp/options.xl2tpd
+length bit = yes

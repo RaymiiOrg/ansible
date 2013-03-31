@@ -1,0 +1,24 @@
+version 2.0
+config setup
+    dumpdir=/var/run/pluto/
+    nat_traversal=yes
+    virtual_private=%v4:10.0.0.0/8,%v4:192.168.0.0/16,%v4:172.16.0.0/12,%v6:fd00::/8,%v6:fe80::/10
+    oe=off
+    protostack=netkey
+
+conn L2TP-PSK-NAT
+    rightsubnet=vhost:%priv
+    also=L2TP-PSK-noNAT
+
+conn L2TP-PSK-noNAT
+    authby=secret
+    pfs=no
+    auto=add
+    keyingtries=3
+    ikelifetime=8h
+    keylife=1h
+    type=transport
+    left={{ ipv4_address }}
+    leftprotoport=17/1701
+    right=%any
+    rightprotoport=17/%any

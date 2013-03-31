@@ -1,0 +1,88 @@
+---
+## IPSEC/L2TP VPN: https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html
+
+- hosts: vpn
+  sudo: True
+  user: remy
+  connection: ssh # or paramiko
+
+  vars:
+    date: $PIPE(date +%s)
+    distro: ${ansible_distribution}
+    pkg_mgr: ${ansible_pkg_mgr}
+    pbname: ${inventory_hostname}
+    ipv4_address: ${ansible_all_ipv4_addresses[0]}
+    shared_secret: "raymiiorg"
+
+
+  tasks:
+    - name: Install required packages with apt
+      apt: name=$item state=latest update_cache=yes
+      with_items:
+        - openswan
+        - xl2tpd
+        - ppp
+        - lsof
+        - iptables
+
+    - name: Set IPtables routing rule
+      command: /sbin/iptables --table nat --append POSTROUTING --jump MASQUERADE
+
+    - name: set /tmp/vpn.sh
+      template: src=config/vpn.sh.in dest=//tmp/vpn.sh owner=root mode=0755
+
+    - name: run specific interface sysctl values
+      command: /tmp/vpn.sh
+      notify: restart xl2tpd
+
+    - name: set sysctl rule net.ipv4.ip_forward to 1
+      sysctl: name=net.ipv4.ip_forward value=1 state=present
+
+    - name: set sysctl rule net.ipv4.conf.all.accept_redirects to 0
+      sysctl: name=net.ipv4.conf.all.accept_redirects value=0 state=present
+
+    - name: set sysctl rule net.ipv4.conf.all.send_redirects to 0
+      sysctl: name=net.ipv4.conf.all.send_redirects value=0 state=present
+
+    - name: set sysctl rule net.ipv4.ip_forward to 1
+      sysctl: name=net.ipv4.ip_forward value=1 state=present  
+
+    - name: set /etc/rc.local
+      template: src=config/etc-rc.local.in dest=/etc/rc.local owner=root
+
+    - name: set /etc/ipsec.conf
+      template: src=config/openswan.conf.in dest=/etc/ipsec.conf owner=root
+      notify: restart openswan
+
+    - name: set /etc/ipsec.secrets
+      template: src=config/etc-ipsec.secrets.conf.in dest=/etc/ipsec.secrets owner=root
+      tags: psk
+      notify: restart openswan
+
+    - name: set /etc/xl2tpd/xl2tpd.conf
+      template: src=config/xl2tpd.conf.in dest=/etc/xl2tpd/xl2tpd.conf owner=root
+      notify: restart xl2tpd
+
+    - name: set /etc/pam.d/ppp
+      template: src=config/pam-ppp.in dest=/etc/pam.d/ppp owner=root
+
+    - name: set /etc/ppp/pap-secrets
+      template: src=config/pap-secrets.in dest=/etc/ppp/pap-secrets owner=root
+
+    - name: set /etc/ppp/options.xl2tpd
+      template: src=config/options.xl2tpd.in dest=/etc/ppp/options.xl2tpd owner=root
+      notify: restart xl2tpd
+
+  handlers:
+  - name: restart openswan
+    service: name=ipsec state=restarted pattern=ipsec
+  
+  - name: restart xl2tpd
+    service: name=xl2tpd state=restarted pattern=xl2tpd
+    
+
+
+
+
+
+
