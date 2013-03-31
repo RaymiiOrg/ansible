@@ -2,33 +2,39 @@
 ## Deploy a munin client with hosted-munin conf servers.
 ## I need a user account which is able to sudo without password
 
-- hosts: nodes
+- hosts: spcs
   sudo: True
   user: remy
+  connection: ssh # or paramiko
 
   vars:
+    date: $LOOKUP(date)
+    pkg_mgr: ${ansible_pkg_mgr}
+    main_user: remy
     pbname: $inventory_hostname
     listenaddr: '*'
     listenport: '4949'
-    addr1: '^127\.0\.0\.1$'
-    addr2: '^127\.0\.0\.2$'
-    #hostedmunin.com
-    addr3: '^91\.227\.249\.12$'
-    addr4: '^91\.227\.249\.13$'
-    addr5: '^91\.227\.249\.20$'
+    allowed_addresses: 
+      - '^127\.0\.0\.1$'
+      - '^91\.227\.249\.12$'
+      - '^91\.227\.249\.13$'
+      - '^91\.227\.249\.20$'
 
   tasks:
 
   - name: Install munin-node
-    action: apt name=$item state=latest
+    action: $pkg_mgr name=$item state=latest
     with_items:
      - munin-node
 
   - name: Set munin-node config file
-    action: template src=config/munin-node.conf.in dest=/etc/munin/munin-node.conf owner=root group=root mode=0755
+    template: src=config/munin-node.conf.in dest=/etc/munin/munin-node.conf owner=root group=root mode=0755
     notify: restart munin-node
 
+  - name: Set munin-plugin config file
+    template: src=config/plugin-conf.in dest=/etc/munin/plugin-conf.d/munin-node owner=root group=root mode=0755
+    notify: restart munin-node
 
   handlers:
     - name: restart munin-node
-      action: service name=munin-node state=restarted
+      service: name=munin-node state=restarted enabled=yes
