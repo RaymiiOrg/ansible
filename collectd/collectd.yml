@@ -1,0 +1,124 @@
+---
+- hosts: collectd
+  sudo: True
+  user: remy
+  connection: ssh # or paramiko
+  vars:
+    interface: ${ansible_default_ipv4.interface}
+    pkg_mgr: ${ansible_pkg_mgr}
+    # ipaddr: ${ansible_default_ipv4.address}
+    # ip6addr: ${ansible_default_ipv6.address}
+    user: remy
+    ipaddr: "*"
+    ip6addr: "*"
+    pbname: ${inventory_hostname}
+    iptables_path: "/sbin/iptables"
+    ip6tables_path: "/sbin/ip6tables"
+    collectd_port: "25826"
+    collectd_servers:
+      - vps5.sparklingclouds.nl
+      - vps21.sparklingclouds.nl
+    extra_plugins:
+      - nginx
+      - iptables
+      - uptime
+      - dns
+      - ping
+
+  tasks:
+  - apt: name=$item state=latest
+    with_items:
+     - collectd
+     - librrds-perl
+     - libconfig-general-perl
+     - libhtml-parser-perl
+     - libregexp-common-perl
+     - liburi-perl
+     - libjson-perl
+     - restartd
+     - python
+    only_if: "'collectd-servers' in $group_names"
+    tags:
+      - packages
+
+  - apt: name=$item state=latest
+    with_items:
+     - collectd
+    only_if: "'collectd-clients' in $group_names"
+    tags:
+      - packages
+
+  - action: template src=config/collectd-client.conf dest=/etc/collectd/collectd.conf owner=root group=root
+    notify: 
+      - restart collectd
+    only_if: "'collectd-clients' in $group_names"
+    tags:
+      - config
+
+
+  - template: src=config/collectd-server.conf dest=/etc/collectd/collectd.conf owner=root group=root
+    only_if: "'collectd-servers' in $group_names"
+    notify: 
+      - restart collectd
+    tags:
+      - config
+
+  - template: src=config/plugins.conf dest=/etc/collectd/plugins.conf owner=root group=root
+    notify: 
+      - restart collectd
+    tags:
+      - config
+
+  - template: src=config/collection.conf dest=/etc/collectd/collections.conf owner=root group=root
+    notify: 
+      - restart collectd
+    tags:
+      - config
+
+  - template: src=config/filters.conf dest=/etc/collectd/filters.conf owner=root group=root
+    notify: 
+      - restart collectd
+    tags:
+      - config
+
+  - template: src=config/thresholds.conf dest=/etc/collectd/thresholds.conf owner=root group=root
+    notify: 
+      - restart collectd
+    tags:
+      - config  
+
+  - git: repo=git://github.com/RaymiiOrg/collectd-web.git dest=/home/$user/collectd-web/
+    only_if: "'collectd-servers' in $group_names"
+    tags:
+      - git
+
+  - template: src=config/restartd.conf dest=/etc/restartd.conf owner=root group=root
+    only_if: "'collectd-servers' in $group_names"  
+    notify:
+      - restart restartd  
+    tags:
+      - config
+
+
+  - template: src=config/iptables.sh dest=/var/iptables-collectd.sh owner=root group=root mode=0755
+    only_if: "'collectd-servers' in $group_names"
+    tags:
+      - firewall
+
+  - command: /var/iptables-collectd.sh
+    only_if: "'collectd-servers' in $group_names"
+    tags:
+      - firewall
+
+  - command: "killall -9 collectd"
+    tags:
+      - config
+    notify: restart collectd
+
+
+  handlers:
+    - name: restart collectd
+      action: service name=collectd enabled=yes pattern=collectd state=restarted
+
+    - name: restart restartd
+      action: service name=restartd enabled=yes pattern=restartd state=restarted
