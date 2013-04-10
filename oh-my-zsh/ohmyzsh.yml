@@ -1,29 +1,40 @@
 ---
 ## Install Oh-my-zsh
-## I need a user account which is able to sudo without password or use the playbook with the -K option (ask sudo pass)
 
-- hosts: vps17.sparklingclouds.nl
+- hosts: spcs
+  user: remy
   sudo: True
+  connection: ssh # or paramiko
 
   vars:
-    user: "remy"
-    zsh_theme: "candy"
+    user: remy
     pbname: $inventory_hostname
     distro: ${ansible_distribution}
     pkg_mgr: ${ansible_pkg_mgr}
+    zsh_theme: steeef
 
   tasks:
-  - name: Install git and zsh with ${pkg_mgr}
-    action: ${pkg_mgr} name=$item state=latest
+  - name: Install git and zsh 
+    apt: name=$item state=latest update_cache=yes
     with_items:
      - git
      - zsh
+     - git-core
 
   - name: Clone oh-my-zsh repo
-    action: git repo=https://github.com/robbyrussell/oh-my-zsh.git dest=/home/${user}/.oh-my-zsh
+    git: repo=https://github.com/robbyrussell/oh-my-zsh.git dest=/home/$user/.oh-my-zsh
 
-  - name: Set .zshrc
-    action: template src=files/zshrc.in dest=/home/${user}/.zshrc
+  - name: deploy .zshrc
+    template: src=files/zshrc.in dest=/home/$user/conf/zshrc owner=$user
+
+  - name: remove standard zshrc
+    file: path=/home/$user/.zshrc state=absent
+
+  - name: Create conf folder in home directory
+    file: path=/home/$user/conf/ state=directory owner=$user
+
+  - name: symlink zshrc
+    file: path=/home/$user/.zshrc src=/home/$user/conf/zshrc state=link owner=$user
 
   - name: Set zsh as default shell
-    action: user name=${user} shell=/bin/zsh
+    user: name=$user shell=/bin/zsh
