@@ -1,7 +1,4 @@
 ---
-## Deploy a munin client with hosted-munin conf servers.
-## I need a user account which is able to sudo without password
-
 - hosts: spcs
   sudo: True
   user: remy
@@ -10,7 +7,6 @@
   vars:
     date: $LOOKUP(date)
     pkg_mgr: ${ansible_pkg_mgr}
-    main_user: remy
     pbname: $inventory_hostname
     listenaddr: '*'
     listenport: '4949'
