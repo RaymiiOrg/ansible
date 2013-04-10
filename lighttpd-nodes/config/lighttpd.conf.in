@@ -35,8 +35,6 @@ compress.filetype  = {{ compress }}
 include_shell "/usr/share/lighttpd/create-mime.assign.pl"
 include_shell "/usr/share/lighttpd/include-conf-enabled.pl"
 
-
-# Added by Raymii
 server.tag = "{{ servertag }}"
 server.document-root = "{{ wwwroot }}"
 server.max-keep-alive-requests = {{ servermaxkeepaliverequests }}
@@ -67,5 +65,3 @@ $HTTP["url"] =~ "/\.git/" {
 $HTTP["url"] =~ "^/" {
    expire.url = ( "" => "{{ contentexpire }}" )
 }
-
-# end added

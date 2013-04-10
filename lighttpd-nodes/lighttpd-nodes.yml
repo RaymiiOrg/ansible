@@ -1,13 +1,11 @@
 ---
-## Setup lighttpd on the cluster slave nodes with certificates and a common config file.
-## Author: R van Elst
-## Last Edited: 12-09-2012
 - hosts: nodes
   sudo: True
   user: remy
       
   vars:
     wwwroot: "/srv/http/"
+    user: "remy"
     sslwwwroot: "/srv/https/"
     wuser: "www-data"
     wgroup: "www-data"
@@ -29,30 +27,24 @@
 
 
   tasks:
-    - name: Check that the server is alive
-      action: ping
-
-    - name: install python-apt for debian
-      action: command /usr/bin/apt-get -y install python-apt
-
     - name: Install lighttpd and php
-      action: apt name=$item state=latest
+      apt: name=$item state=latest
       with_items:
         - lighttpd
         - php5-cgi
 
     - name: Create ssl certificate dir
-      action: file path=/etc/ssl/cert state=directory
+      file: path=/etc/ssl/cert state=directory
 
-    - name: copy raymii.org ssl certificate
-      action: copy src=config/cert.pem dest=/etc/ssl/cert/cert.pem owner=www-data group=www-data mode=0644
+    # - name: copy raymii.org ssl certificate
+    #   copy: src=config/cert.pem dest=/etc/ssl/cert/cert.pem owner=www-data group=www-data mode=0644
 
-    - name: copy ca-bundle ca chain
-      action: copy src=config/ca-bundle.crt dest=/etc/ssl/cert/ca-bundle.crt owner=www-data group=www-data mode=0644
+    # - name: copy ca-bundle ca chain
+    #   copy: src=config/ca-bundle.crt dest=/etc/ssl/cert/ca-bundle.crt owner=www-data group=www-data mode=0644
 
 
     - name: copy lighttpd slave node config
-      action: template src=config/lighttpd.conf.in dest=/etc/lighttpd/lighttpd.conf backup=yes
+      template: src=config/lighttpd.conf.in dest=/etc/lighttpd/lighttpd.conf backup=yes
       notify: restart lighttpd
 
     - name: Fix cgi-pathinfo
@@ -61,11 +53,11 @@
 
 
     - name: Enable lighttpd fastcgi + php module
-      action: command lighttpd-enable-mod fastcgi && lighttpd-enable-mod fastcgi-php
+      command: lighttpd-enable-mod fastcgi && lighttpd-enable-mod fastcgi-php
       notify: restart lighttpd
 
     - name: Give users permisisons on /var/www folder
-      action: file path=/var/www/ state=directory owner=remy group=remy mode=755  
+      file: path=/var/www/ state=directory owner=$user group=$user mode=755  
 
 
   handlers:
