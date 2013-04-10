@@ -10,7 +10,8 @@ My ansible playbooks.
 * vnstat is used to install and setup vnstat on debian, including initializing and config file setup.
 * oh-my-zsh is to st up zsh and the [oh-my-zsh by robbyrussel](https://github.com/robbyrussell/oh-my-zsh) config.
 * collectd is to set up collectd servers and collectd clients, using the `collectd-servers` and `collectd-clients` groups, [see tutorial on Raymii.org](https://raymii.org/s/tutorials/Collectd_server_setup_tutorial_with_web_frontend.html)
-* sudo is to set up sudo as I like it.
+* sudo is to set up sudo as I like it, with an admin group and such.
+* vpn is used to set ip an IPSEC/L2TP VPN server with local user (PAM/UNIX) authentication [as described here](https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html)
 
 Playbooks are here merely for example for others and reference. 
 
