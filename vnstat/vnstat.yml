@@ -1,8 +1,5 @@
 ---
-## Setup vnstat on a debian server.
-## I need a user account which is able to sudo without password
-
-- hosts: nodes
+- hosts: spcs
   sudo: True
   user: remy
 
@@ -13,16 +10,16 @@
 
   tasks:
   - name: Install packages
-    action: apt name=$item state=latest
+    apt: name=$item state=latest
     with_items:
      - vnstat
 
   - name: Set up vnstat config file
-    action: template src=config/vnstat.conf.in dest=/etc/vnstat.conf mode=0755 owner=root group=root
+    template: src=config/vnstat.conf.in dest=/etc/vnstat.conf mode=0755 owner=root group=root
     notify: restart vnstat
 
   - name: Ininitalize vnstat
-    action: command sudo vnstat -u -i $interface
+    command: sudo vnstat -u -i $interface
 
   handlers:
     - name: restart vnstat

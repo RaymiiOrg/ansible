@@ -1,5 +1,4 @@
 ---
-
 - hosts: spcs
   sudo: True
   user: remy
