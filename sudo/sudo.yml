@@ -1,0 +1,38 @@
+---
+
+- hosts: spcs
+  sudo: True
+  user: remy
+  connection: ssh # or paramiko
+
+  vars:
+    date: $PIPE(date +%s)
+    distro: ${ansible_distribution}
+    pkg_mgr: ${ansible_pkg_mgr}
+    pbname: $inventory_hostname
+
+  tasks:
+  - apt: name=$item state=latest
+    with_items:
+    - sudo
+
+  - name: Copy sudoers file for safety
+    command: cp -f /etc/sudoers /etc/sudoers.tmp
+
+  - name: Create sudoers file backup
+    command: cp -f /etc/sudoers /etc/sudoers.${date}.bak
+
+  - name: Create admins group
+    group: name=admins system=yes state=present
+
+  - name: make sure we can sudo as admin group
+    lineinfile: dest=/etc/sudoers.tmp state=present regexp='^%admin ALL\=\(ALL\) ALL' line='%admin ALL=(ALL) ALL'
+
+  - name: also make sure ssh-agent works via sudo
+    lineinfile: dest=/etc/sudoers.tmp state=present regexp='^Defaults env_keep\+\=SSH_AUTH_SOCK' line='Defaults env_keep+=SSH_AUTH_SOCK'
+ 
+  - name: and mail bad passwords
+    lineinfile: dest=/etc/sudoers.tmp state=present regexp='^Defaults mail_badpass' line='Defaults mail_badpass'
+
+  - name: Final sudoers file check
+    shell: visudo -q -c -f /etc/sudoers.tmp && cp -f /etc/sudoers.tmp /etc/sudoers
