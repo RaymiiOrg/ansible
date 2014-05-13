@@ -17,7 +17,7 @@
 
   tasks:
     - name: Install required packages with apt
-      apt: name=$item state=latest update_cache=yes
+      apt: name={{item}} state=latest update_cache=yes
       with_items:
         - openswan
         - xl2tpd
