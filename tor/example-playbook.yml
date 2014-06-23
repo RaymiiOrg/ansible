@@ -1,0 +1,5 @@
+---
+- hosts: tor
+
+  roles:
+  - { role: tor, sudo: yes }

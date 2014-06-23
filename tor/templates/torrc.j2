@@ -1,0 +1,21 @@
+## {{ ansible_managed }} 
+SocksPort 0 
+SocksPolicy reject *
+Log notice syslog
+RunAsDaemon {{ run_as_daemon }}
+ORPort 9001
+Nickname {{ tor_node_name  }}
+RelayBandwidthRate {{ relay_bandwidth_rate }}
+RelayBandwidthBurst {{ relay_bandwidth_burst }}
+{% if accounting_max is defined %}
+AccountingMax {{ accounting_max }}
+AccountingStart {{ accounting_start }}
+{% endif %}
+ContactInfo {{ contact_info }}
+DirPort 9030 
+DirPortFrontPage /etc/tor/notice.html
+{% if my_family is defined %}
+MyFamily {{ my_family }}
+{% endif %}
+ExitPolicy {{ exit_policy }}
+

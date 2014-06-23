@@ -12,8 +12,11 @@ My ansible playbooks.
 * collectd is to set up collectd servers and collectd clients, using the `collectd-servers` and `collectd-clients` groups, [see tutorial on Raymii.org](https://raymii.org/s/tutorials/Collectd_server_setup_tutorial_with_web_frontend.html)
 * sudo is to set up sudo as I like it, with an admin group and such.
 * vpn is used to set ip an IPSEC/L2TP VPN server with local user (PAM/UNIX) authentication [as described here](https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html)
+* tor is used to set up a tor relay node
 
 Playbooks are here merely for example for others and reference. 
+
+**Note: Playbooks may be outdated. Pull requests welcome**
 
 
 # License

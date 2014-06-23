@@ -1,0 +1,58 @@
+---
+- template: src=tor.gpg.key.j2 dest=/root/tor.gpg.key
+  register: gpgkey
+  when: "ansible_os_family == 'Debian'"
+
+- command: "apt-key add /root/tor.gpg.key"
+  when: gpgkey.changed 
+  when: "ansible_os_family == 'Debian'"
+
+- template: src=tor.list.j2 dest=/etc/apt/sources.list.d/tor.list
+  when: "ansible_os_family == 'Debian'"
+
+- file: path=/etc/tor state=directory
+
+- template: src=notice.html.j2 dest=/etc/tor/notice.html
+
+- template: src=iptables-save.j2 dest=/etc/iptables.save
+  when: "mirror_dirport_to_80 == 'true'"
+  register: iptables
+
+- shell: "/sbin/iptables-restore < /etc/iptables.save"
+  when: "mirror_dirport_to_80 == 'true'"
+  when: iptables.changed
+
+- template: src=rc.local.j2 dest=/etc/rc.local mode=0755
+  when: "ansible_os_family == 'Debian'"
+
+- apt: name={{ item }} state=latest update_cache=yes
+  with_items: 
+    - deb.torproject.org-keyring
+    - haveged
+    - tor
+  when: "ansible_os_family == 'Debian'"
+
+- pacman: name={{ item }} state=present update_cache=yes
+  with_items: 
+    - haveged
+    - tor
+  when: "ansible_os_family == 'Archlinux'"
+
+- template: src=torrc.j2 dest=/etc/tor/torrc
+  register: torrc
+
+- service: name=tor enabled=true
+
+- service: name=tor state=restarted
+  when: torrc.changed
+
+- command: 'find /var/lib/tor -name fingerprint -exec cut -d" " -f 2 {} \;'
+  register: fingerprint
+  when: torrc.changed
+
+- debug: var=fingerprint.stdout
+  when: torrc.changed
+
+- set_fact: tor_fingerprint={{ fingerprint.stdout }}
+  when: torrc.changed
+

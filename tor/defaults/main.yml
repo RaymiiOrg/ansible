@@ -1,0 +1,18 @@
+---
+my_family: ""
+
+run_as_daemon: 1
+
+tor_node_name: "ididnteditheconfig"
+
+relay_bandwidth_rate: "5 MB"
+relay_bandwidth_burst: "10 MB"
+
+accounting_max: "5 GB"
+accounting_start: "day 10:00"
+
+contact_info: "0xFFFFFFFF Random Person <nobody AT example dot com>"
+
+exit_policy: "reject *:*"
+
+mirror_dirport_to_80: "false"

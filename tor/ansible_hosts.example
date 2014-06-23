@@ -1,0 +1,2 @@
+[tor]
+vps.example.org tor_node_name=example_vps accounting_max="100GB" accounting_start="day 10:00"
