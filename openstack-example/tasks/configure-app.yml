@@ -1,0 +1,37 @@
+---
+- apt:
+    name="{{ item }}" 
+    state=latest 
+    update_cache=yes
+  with_items:
+    - php5-mysql
+    - python-pip
+    - php5 
+    - libapache2-mod-php5 
+    - php5-mcrypt
+    - vim
+    - git
+    - ntp
+
+- git: 
+    repo: https://github.com/WordPress/WordPress.git 
+    dest: /var/www/html/site
+    force: yes
+    update: no
+  when: '"{{ inventory_hostname }}" == "{{ groups.app[0] }}"'
+
+
+- file:
+    dest: /var/www/html/index.html
+    state: absent
+
+- template:
+    src: wp-config.php.j2
+    dest: /var/www/html/site/wp-config.php
+  when: '"{{ inventory_hostname }}" == "{{ groups.app[0] }}"'
+
+
+- copy:
+    src: index.php
+    dest: /var/www/html/index.php
+  when: '"{{ inventory_hostname }}" == "{{ groups.app[0] }}"'

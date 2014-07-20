@@ -1,0 +1,48 @@
+---
+# boot bug in standard 14.04 packages: https://bugs.launchpad.net/ubuntu/+source/glusterfs/+bug/1268064
+- apt_repository: 
+    repo: 'ppa:semiosis/ubuntu-glusterfs-3.4'
+    state: present
+    update_cache: yes
+
+- apt:
+    name: "{{ item }}" 
+    state: installed 
+    update_cache: yes
+  with_items:
+    - glusterfs-server
+    - glusterfs-client
+
+- file: 
+    path: "{{ gluster_brick_dir }}" 
+    state: directory
+
+- shell: "gluster peer probe {{ item }}"
+  with_items:
+    - "{{ groups.app }}"
+
+- shell: 'echo {{ groups.app }} | sed -e "s/\]//g" -e "s/, u/, /g" -e "s/\[u//g" -e "s%,%:{{ gluster_brick_dir }} %g; s%$%:{{ gluster_brick_dir }}%"'
+  register: gluster_bricks
+  connection: local
+
+- shell: 'gluster volume info {{ gluster_volume }} || 
+          gluster volume create {{ gluster_volume }} transport tcp replica 2
+          {{ gluster_bricks.stdout }} force'
+  when: '"{{ inventory_hostname }}" == "{{ groups.app[0] }}"'
+
+- wait_for: 
+    delay: 15
+    timeout: 15
+
+- shell: 'gluster volume info {{ gluster_volume }} | grep "Status: Started" || 
+          gluster volume start {{ gluster_volume }}'
+
+- file: 
+    path: "/var/www/html" 
+    state: directory
+
+- mount: 
+    name: /var/www/html
+    fstype: glusterfs 
+    src: "{{ groups.app[0] }}:{{ gluster_volume }}"
+    state: mounted

@@ -1,0 +1,26 @@
+---
+auth_url: https://identity.stack.cloudvps.com/v2.0  
+login_username: 
+login_password: 
+login_tenant_name: 
+image_name: 'CloudVPS Ubuntu 14.04'
+image_id: 
+private_net: 
+public_net: 00000000-0000-0000-0000-000000000000
+public_net_name: "net-public"
+keypair_name: ""
+flavor_id: 101
+website_name: "example.org"
+mysql_user: "app"
+mysql_password: "FPyfUItINE2gMsMM"
+
+keepalived_sql_vip: "10.107.244.210"
+keepalived_sql_router_id: "60"
+keepalived_sql_passwd: "AbAoSlcc2BgJiGks"
+
+keepalived_lbs_vip: "10.107.244.200"
+keepalived_lbs_router_id: "50"
+keepalived_lbs_passwd: "m9RwTzFk3MxtyXp0"
+
+gluster_brick_dir: "/srv/gluster/brick"
+gluster_volume: default

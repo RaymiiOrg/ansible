@@ -3,7 +3,7 @@ Ansible
 
 My ansible playbooks. 
 
-* lighttpd-nodes is used for installing and configuring lighttpd with an ssl certificate as I want it.  
+* lighttpd-nodes is used for installing and configuring lighttpd.
 * raymon is used to deploy my little status monitoring applicaton server: [Ray-Mon](https://raymii.org/cms/p_Bash_PHP_Server_Status_Monitor)  
 * start is for the app by Bas ten Feld: [start](https://github.com/develup/start)  
 * munin-client is used to install munin client, it has the [hostedmunin.com](http://hostedmunin.com) servers by default, but you can essily define your own.
@@ -13,6 +13,7 @@ My ansible playbooks.
 * sudo is to set up sudo as I like it, with an admin group and such.
 * vpn is used to set ip an IPSEC/L2TP VPN server with local user (PAM/UNIX) authentication [as described here](https://raymii.org/s/tutorials/IPSEC_L2TP_vpn_with_Ubuntu_12.04.html)
 * tor is used to set up a tor relay node
+* openstack-example  is used for the following tutorial: []()
 
 Playbooks are here merely for example for others and reference. 
 
@@ -23,7 +24,7 @@ Playbooks are here merely for example for others and reference.
 
 Unless otherwise stated:
 
-    Copyright (C) 2013 Remy van Elst
+    Copyright (C) 2014 Remy van Elst
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

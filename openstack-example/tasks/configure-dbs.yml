@@ -1,0 +1,80 @@
+---
+- apt: 
+    name="{{ item }}" 
+    state=latest 
+    update_cache=yes
+  with_items:
+    - mysql-server
+    - python-mysqldb
+    - vim
+    - git
+    - ntp
+
+- template:
+    src: my.cnf.j2
+    dest: /etc/mysql/my.cnf
+  notify:
+    - restart mysql
+
+- fetch:
+    src: /etc/mysql/debian.cnf 
+    flat: yes
+    dest: "/tmp/my.cnf.{{ ansible_hostname }}"
+
+- copy:
+    src: "/tmp/my.cnf.{{ ansible_hostname }}"
+    dest: /root/.my.cnf
+
+- mysql_user: 
+    user: "" 
+    state: "absent" 
+
+- mysql_user: 
+    name: "{{ mysql_user }}" 
+    password: "{{ mysql_password }}"
+    host: "%"
+    priv: '{{ mysql_user }}.*:ALL'
+    state: present 
+
+- mysql_db: 
+    name: "{{ mysql_user }}"
+    state: present
+
+- mysql_user: 
+    name: "replicator" 
+    host: "%" 
+    password: "{{ mysql_password }}"
+    priv: "*.*:REPLICATION SLAVE"
+    state: present
+  notify:
+    - restart mysql
+
+- stat: path=/etc/mysql/ansible.repl
+  register: check_sql_path
+
+- mysql_replication: 
+    mode: changemaster 
+    master_host: "{{ groups.dbs[1] }}" 
+    master_user: replicator 
+    master_password: "{{ mysql_password }}"
+  when: check_sql_path.stat.exists == false and '{{ inventory_hostname }}' == '{{ groups.dbs[0] }}'
+  register: sqlresult0
+  notify:
+    - restart mysql
+
+- mysql_replication: 
+    mode: changemaster 
+    master_host: "{{ groups.dbs[0] }}" 
+    master_user: replicator 
+    master_password: "{{ mysql_password }}"
+  when: check_sql_path.stat.exists == false and '{{ inventory_hostname }}' == '{{ groups.dbs[1] }}'
+  register: sqlresult1
+  notify:
+    - restart mysql
+
+- command: touch /etc/mysql/repl.ansible
+  when: check_sql_path.stat.exists == false and '{{ inventory_hostname }}' == '{{ groups.dbs[1] }}'
+
+- command: touch /etc/mysql/repl.ansible
+  when: check_sql_path.stat.exists == false and '{{ inventory_hostname }}' == '{{ groups.dbs[1] }}'
+

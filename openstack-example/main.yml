@@ -1,0 +1,47 @@
+---
+- name: Create Instances
+  hosts: 127.0.0.1
+  connection: local
+  vars_files:
+    - "vars/main.yml"
+  tasks:
+    - include: tasks/create-instances.yml
+
+# Both lbs group and app group but only execute on lbs group. Otherwise 
+# facts about app group are not gathered and config fails
+- name: Configure LoadBalancers
+  hosts: lbs:app
+  vars_files:
+    - "vars/main.yml"
+  user: root
+  tasks:
+    - include: tasks/configure-lbs.yml
+      when: '"{{ inventory_hostname }}" in "{{ groups.lbs }}"'
+    - include: tasks/keepalived.yml
+      when: '"{{ inventory_hostname }}" in "{{ groups.lbs }}"'
+  handlers:
+    - include: handlers/main.yml
+
+- name: Configure Databases
+  hosts: dbs
+  vars_files:
+    - "vars/main.yml"
+  user: root
+  tasks:
+    - include: tasks/configure-dbs.yml
+    - include: tasks/keepalived.yml
+  handlers:
+    - include: handlers/main.yml
+
+- name: Configure App Server
+  hosts: app
+  vars_files:
+    - "vars/main.yml"
+  user: root
+  tasks:
+    - include: tasks/configure-gluster-app.yml
+    - include: tasks/configure-app.yml
+  handlers:
+    - include: handlers/main.yml
+
+

@@ -1,0 +1,34 @@
+---
+- apt: 
+    name: "{{ item }}" 
+    state: latest 
+    update_cache: yes
+  with_items:
+    - keepalived
+
+- sysctl: 
+    name: net.ipv4.ip_nonlocal_bind 
+    value: "1" 
+    state: present
+    reload: yes
+
+- template:
+    src: keepalived.lbs.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+  when: inventory_hostname in groups['lbs']
+  notify:
+    - restart keepalived
+
+- template:
+    src: keepalived.sql.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+  when: inventory_hostname in groups['dbs']
+  notify:
+    - restart keepalived
+
+- service: 
+    name: "{{ item }}"
+    state: restarted 
+    enabled: yes
+  with_items:
+    - keepalived

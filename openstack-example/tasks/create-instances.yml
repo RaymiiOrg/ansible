@@ -1,0 +1,157 @@
+---
+- nova_compute:
+    auth_url: "{{ auth_url }}"
+    login_username: "{{ login_username }}"
+    login_password: "{{ login_password }}"
+    login_tenant_name: "{{ login_tenant_name }}"
+    security_groups: "built-in-allow-all"
+    state: present
+    availability_zone: "NL2"
+    name: ansible-cluster-lb1
+    image_id: "{{ image_id }}"
+    key_name: "{{ keypair_name }}"
+    wait_for: 500
+    nics:
+      - net-id: "{{ private_net }}"
+    flavor_id: "{{ flavor_id }}"
+    meta:
+      hostname: ansible-cluster-lb1
+      group: ansible
+  register: openstacklb1
+
+- add_host: 
+    name: "{{ openstacklb1.private_ip }}" 
+    groupname: lbs 
+    keepalived_lbs_prio: 150
+
+- nova_compute:
+    auth_url: "{{ auth_url }}"
+    login_username: "{{ login_username }}"
+    login_password: "{{ login_password }}"
+    login_tenant_name: "{{ login_tenant_name }}"
+    security_groups: "built-in-allow-all"
+    state: present
+    name: ansible-cluster-lb2
+    availability_zone: "NL1"
+    image_id: "{{ image_id }}"
+    key_name: "{{ keypair_name }}"
+    wait_for: 500
+    nics:
+      - net-id: "{{ private_net }}"
+    flavor_id: "{{ flavor_id }}"
+    meta:
+      hostname: ansible-cluster-lb2
+      group: ansible
+  register: openstacklb2
+
+
+
+- add_host: 
+    name: "{{ openstacklb2.private_ip }}" 
+    groupname: lbs
+    keepalived_lbs_prio: 100
+
+
+- nova_compute:
+    auth_url: "{{ auth_url }}"
+    login_username: "{{ login_username }}"
+    login_password: "{{ login_password }}"
+    login_tenant_name: "{{ login_tenant_name }}"
+    security_groups: "built-in-allow-all"
+    state: present
+    name: ansible-cluster-db1
+    availability_zone: "NL1"
+    image_id: "{{ image_id }}"
+    key_name: "{{ keypair_name }}"
+    wait_for: 500
+    nics:
+      - net-id: "{{ private_net }}"
+    flavor_id: "{{ flavor_id }}"
+    meta:
+      hostname: ansible-cluster-db1
+      group: ansible
+  register: openstackdb1
+
+- add_host: 
+    name: "{{ openstackdb1.private_ip }}" 
+    groupname: dbs
+    sql_server_id: 1
+    keepalived_sql_prio: 150
+
+
+
+- nova_compute:
+    auth_url: "{{ auth_url }}"
+    login_username: "{{ login_username }}"
+    login_password: "{{ login_password }}"
+    login_tenant_name: "{{ login_tenant_name }}"
+    security_groups: "built-in-allow-all"
+    state: present
+    name: ansible-cluster-db2
+    availability_zone: "NL2"
+    image_id: "{{ image_id }}"
+    key_name: "{{ keypair_name }}"
+    wait_for: 500
+    nics:
+      - net-id: "{{ private_net }}"
+    flavor_id: "{{ flavor_id }}"
+    meta:
+      hostname: ansible-cluster-db2
+      group: ansible
+  register: openstackdb2
+
+
+- add_host: 
+    name: "{{ openstackdb2.private_ip }}" 
+    groupname: dbs
+    sql_server_id: 2
+    keepalived_sql_prio: 100
+
+
+- nova_compute:
+    auth_url: "{{ auth_url }}"
+    login_username: "{{ login_username }}"
+    login_password: "{{ login_password }}"
+    login_tenant_name: "{{ login_tenant_name }}"
+    security_groups: "built-in-allow-all"
+    state: present
+    name: ansible-cluster-app1
+    availability_zone: "NL1"
+    image_id: "{{ image_id }}"
+    key_name: "{{ keypair_name }}"
+    wait_for: 500
+    nics:
+      - net-id: "{{ private_net }}"
+    flavor_id: "{{ flavor_id }}"
+    meta:
+      hostname: ansible-cluster-app1
+      group: ansible
+  register: openstackapp1
+
+- add_host: 
+    name: "{{ openstackapp1.private_ip }}" 
+    groupname: app
+
+- nova_compute:
+    auth_url: "{{ auth_url }}"
+    login_username: "{{ login_username }}"
+    login_password: "{{ login_password }}"
+    login_tenant_name: "{{ login_tenant_name }}"
+    security_groups: "built-in-allow-all"
+    state: present
+    name: ansible-cluster-app2
+    availability_zone: "NL2"
+    image_id: "{{ image_id }}"
+    key_name: "{{ keypair_name }}"
+    wait_for: 500
+    nics:
+      - net-id: "{{ private_net }}"
+    flavor_id: "{{ flavor_id }}"
+    meta:
+      hostname: ansible-cluster-app2
+      group: ansible
+  register: openstackapp2
+
+- add_host: 
+    name: "{{ openstackapp2.private_ip }}" 
+    groupname: app

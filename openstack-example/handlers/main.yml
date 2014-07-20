@@ -1,0 +1,25 @@
+---
+
+- name: restart nginx
+  service: 
+    name: nginx
+    state: restarted
+    enabled: yes
+
+- name: restart keepalived
+  service: 
+    name: keepalived
+    state: restarted
+    enabled: yes
+
+- name: restart mysql
+  service: 
+    name: mysql
+    state: restarted
+    enabled: yes
+
+- name: restart apache2
+  service: 
+    name: apache2
+    state: restarted
+    enabled: yes

@@ -1,0 +1,17 @@
+! Configuration File for keepalived
+
+vrrp_instance VI_1 {
+    state MASTER
+    interface eth0
+    virtual_router_id {{ keepalived_sql_router_id }}
+    priority {{ keepalived_sql_prio }}
+
+    advert_int 1
+    authentication {
+        auth_type PASS
+        auth_pass {{ keepalived_sql_passwd }}
+    }
+    virtual_ipaddress {
+        {{ keepalived_sql_vip }}
+    }
+}
