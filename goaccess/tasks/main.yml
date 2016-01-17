@@ -1,0 +1,29 @@
+---
+
+- file: path=/var/keys state=directory owner=root
+
+- get_url: url=http://deb.goaccess.io/gnugpg.key dest=/var/keys/goaccess_signing.key
+  register: result
+
+- command: "apt-key add /var/keys/goaccess_signing.key"
+  when: result.changed
+
+- apt_repository: repo='deb http://deb.goaccess.io jessie main' state=present
+
+- apt: update_cache=yes
+
+- action: apt name=goaccess state=latest
+
+- action: apt name=xz-utils state=latest
+
+- template: src=goaccess.conf.j2 dest=/etc/goaccess.conf backup=no
+  tags:
+    - config
+
+- cron: name="goaccess" minute=5 hour=0
+        user="root" job="zcat -f /var/log/nginx/access.log* | goaccess --no-progress -a > /var/www/report.html"
+        cron_file=ansible_goaccess
+
+- cron: name="goaccess-latest" minute=0
+        user="root" job="goaccess --no-progress -f /var/log/nginx/access.log -a > /var/www/report-lastlog.html"
+        cron_file=ansible_goaccess-latest
